@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { env } from '../config/env';
-import { User } from '../models/User';
+import { User } from '@/models/User';
 import { AuthRequest, JwtPayload } from '../types';
 
 export const protect = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -65,7 +65,7 @@ export const refreshToken = async (req: AuthRequest, res: Response, next: NextFu
       // Get user and check if refresh token matches
       const user = await User.findById(decoded.id).select('+refreshToken');
 
-      if (!user || user.refreshToken !== refreshToken) {
+      if (!user || (user as any).refreshToken !== refreshToken) {
         return res.status(401).json({
           status: 'error',
           message: 'Invalid refresh token'

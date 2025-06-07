@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
-import { User } from '../models/User';
-import { AppError } from '../middleware/error';
+import { User } from '@/models/User';
+import { AppError } from '@/middleware/error';
 import { AuthRequest } from '../types';
 
 export class AuthController {
@@ -57,7 +57,7 @@ export class AuthController {
       }
 
       // Check password
-      const isMatch = await user.comparePassword(password);
+      const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
         throw new AppError('Invalid credentials', 401);
       }
@@ -115,7 +115,7 @@ export class AuthController {
         throw new AppError('Not authenticated', 401);
       }
 
-      user.refreshToken = undefined;
+      (user as any).refreshToken = undefined;
       await user.save();
 
       res.json({

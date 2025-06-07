@@ -94,7 +94,7 @@ playlistSchema.methods.addTrack = async function(trackId: IMusicTrack['_id']): P
 };
 
 playlistSchema.methods.removeTrack = async function(trackId: IMusicTrack['_id']): Promise<void> {
-  this.tracks = this.tracks.filter(id => !id.equals(trackId));
+  this.tracks = this.tracks.filter((id) => !id.equals(trackId));
   await this.save();
 };
 

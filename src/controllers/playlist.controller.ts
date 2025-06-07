@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { Playlist } from '../models/Playlist';
 import { AuthRequest } from '../types';
-import { AppError } from '../middleware/error';
+import { AppError } from '@/middleware/error';
 import mongoose from 'mongoose';
 
 export class PlaylistController {
@@ -98,7 +98,7 @@ export class PlaylistController {
       }
 
       // Check if user has access to the playlist
-      if (!playlist.isPublic && (!req.user || playlist.owner.toString() !== req.user._id.toString())) {
+      if (!playlist.isPublic && (!req.user || (playlist.owner as mongoose.Types.ObjectId).toString() !== req.user._id.toString())) {
         throw new AppError('Not authorized to access this playlist', 403);
       }
 

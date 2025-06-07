@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { MusicTrack } from '../models/MusicTrack';
 import { AuthRequest, MusicTrackFilters } from '../types';
-import { AppError } from '../middleware/error';
+import { AppError } from '@/middleware/error';
 
 export class TrackController {
   // Create new track
@@ -89,7 +89,7 @@ export class TrackController {
       }
 
       // Check if user has access to the track
-      if (!track.isPublic && (!req.user || track.owner.toString() !== req.user._id.toString())) {
+      if (!track.isPublic && (!req.user || (track.owner as any).toString() !== req.user._id.toString())) {
         throw new AppError('Not authorized to access this track', 403);
       }
 
@@ -112,7 +112,7 @@ export class TrackController {
       }
 
       // Check ownership
-      if (track.owner.toString() !== req.user!._id.toString()) {
+      if ((track.owner as any).toString() !== req.user!._id.toString()) {
         throw new AppError('Not authorized to update this track', 403);
       }
 
@@ -139,7 +139,7 @@ export class TrackController {
       }
 
       // Check ownership
-      if (track.owner.toString() !== req.user!._id.toString()) {
+      if ((track.owner as any).toString() !== req.user!._id.toString()) {
         throw new AppError('Not authorized to delete this track', 403);
       }
 

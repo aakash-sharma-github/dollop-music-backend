@@ -7,7 +7,7 @@ dotenv.config({ path: path.join(__dirname, '../../.env') });
 export const env = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   PORT: parseInt(process.env.PORT || '5000', 10),
-  MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/dollop-music',
+  MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/music_backend',
   JWT_SECRET: process.env.JWT_SECRET || 'default-jwt-secret',
   JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || 'default-refresh-secret',
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '1h',
