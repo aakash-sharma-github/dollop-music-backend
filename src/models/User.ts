@@ -7,6 +7,7 @@ export interface IUser extends Document {
     username: string;
     email: string;
     password: string;
+    refreshToken?: string;
     createdAt: Date;
     updatedAt: Date;
     preferences?: {
@@ -40,6 +41,10 @@ const userSchema = new Schema<IUser>(
             type: String,
             required: [true, "Password is required"],
             minlength: [8, "Password must be at least 8 characters long"]
+        },
+        refreshToken: {
+            type: String,
+            select: false
         },
         preferences: {
             theme: {
@@ -75,14 +80,14 @@ userSchema.pre("save", async function (next) {
 
 // Method to generate JWT auth token
 userSchema.methods.generateAuthToken = function () {
-    return jwt.sign({ userId: this._id }, String(env.JWT_SECRET), {
+    return jwt.sign({ id: this._id }, String(env.JWT_SECRET), {
         expiresIn: env.JWT_EXPIRES_IN
     });
 };
 
 // Method to generate refresh token
 userSchema.methods.generateRefreshToken = function () {
-    return jwt.sign({ userId: this._id }, env.JWT_REFRESH_SECRET, {
+    return jwt.sign({ id: this._id }, env.JWT_REFRESH_SECRET, {
         expiresIn: env.JWT_REFRESH_EXPIRES_IN
     });
 };

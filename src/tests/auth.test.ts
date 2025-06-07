@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { app } from '../index';
+import app from '../index';
 import { User } from '../models/User';
 import { createTestUser } from './helpers';
 
@@ -25,7 +25,11 @@ describe('Auth Endpoints', () => {
     });
 
     it('should not register user with existing email', async () => {
-      await createTestUser({ email: validUser.email });
+      await createTestUser({ 
+        email: validUser.email,
+        username: 'existinguser',
+        password: 'Password123!'
+      });
 
       const res = await request(app)
         .post('/api/v1/auth/register')

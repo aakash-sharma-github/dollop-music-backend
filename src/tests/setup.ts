@@ -1,20 +1,26 @@
-import dotenv from 'dotenv';
-import path from 'path';
-import mongoose from 'mongoose';
+import dotenv from "dotenv";
+import path from "path";
+import mongoose from "mongoose";
+import { beforeAll, afterAll, beforeEach } from "@jest/globals";
 
 // Load test environment variables
-dotenv.config({ path: path.join(__dirname, '../../.env.test') });
+const envir = dotenv.config({ path: path.join(__dirname, "../../.env.test") });
 
 // Set test environment
-process.env.NODE_ENV = 'test';
-process.env.MONGODB_URI = process.env.TEST_MONGODB_URI || 'mongodb://localhost:27017/dollop-music-test';
+process.env.NODE_ENV = "test";
+process.env.MONGODB_URI =
+  process.env.TEST_MONGODB_URI || "mongodb://localhost:27017/testMusicBackend";
 
 // Function to connect to test database
 export const setupTestDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
+    await mongoose.connect(
+      process.env.TEST_MONGODB_URI ||
+        process.env.MONGODB_URI ||
+        "mongodb://localhost:27017/testMusicBackend"
+    );
   } catch (error) {
-    console.error('Error connecting to test database:', error);
+    console.error("Error connecting to test database:", error);
     process.exit(1);
   }
 };
@@ -25,7 +31,7 @@ export const closeTestDB = async () => {
     await mongoose.connection.dropDatabase();
     await mongoose.connection.close();
   } catch (error) {
-    console.error('Error closing test database:', error);
+    console.error("Error closing test database:", error);
     process.exit(1);
   }
 };
@@ -50,4 +56,3 @@ afterAll(async () => {
 beforeEach(async () => {
   await clearDatabase();
 });
-

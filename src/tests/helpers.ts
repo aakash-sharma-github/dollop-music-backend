@@ -1,8 +1,13 @@
 import { Request } from 'express';
-import request from 'supertest';
 import jwt from 'jsonwebtoken';
-import { User } from '../models/user.model';
-import { app } from '../app';
+import { Types } from 'mongoose';
+import mongoose from 'mongoose';
+import request from 'supertest';
+import app from '../index';
+import { User } from '../models/User';
+import { MusicTrack } from '../models/MusicTrack';
+import { Playlist } from '../models/Playlist';
+import { IUser } from '../models/User';
 
 interface TestUser {
   email: string;
@@ -22,7 +27,7 @@ export const adminUserData: TestUser = {
   username: 'adminuser'
 };
 
-export const createTestUser = async (userData: TestUser = testUserData) => {
+export const createTestUserWithToken = async (userData: TestUser = testUserData) => {
   const user = await User.create({
     email: userData.email,
     password: userData.password,
@@ -51,7 +56,8 @@ export const getAuthHeader = (token: string) => ({
 });
 
 export const createAuthenticatedRequest = (token: string) => {
-  return request(app).set(getAuthHeader(token));
+  const req = request(app);
+  return req.set(getAuthHeader(token)) as unknown as request.SuperTest<request.Test>;
 };
 
 // Helper to verify if a request is authenticated
@@ -75,8 +81,8 @@ export const createMultipleTestUsers = async (count: number) => {
       password: `Password${i}123!`,
       username: `testuser${i}`
     };
-    const { user, token } = await createTestUser(userData);
-    users.push({ user, token });
+    const { user, accessToken } = await createTestUser(userData);
+    users.push({ user, accessToken });
   }
   return users;
 };
@@ -100,54 +106,6 @@ export const simulateFailedRequest = async (
   
   return req;
 };
-
-import { Types } from 'mongoose';
-import request from 'supertest';
-import { app } from '../index';
-
-export const createTestUser = async () => {
-  const response = await request(app)
-    .post('/api/v1/auth/register')
-    .send({
-      email: `test${Date.now()}@example.com`,
-      password: 'Test123!',
-      username: `testuser${Date.now()}`
-    });
-
-  return {
-    user: response.body.data.user,
-    accessToken: response.body.data.accessToken
-  };
-};
-
-export const createTestTrack = async (userId: Types.ObjectId, trackData: any) => {
-  const response = await request(app)
-    .post('/api/v1/tracks')
-    .set('Authorization', `Bearer ${(await createTestUser()).accessToken}`)
-    .send({
-      ...trackData,
-      userId
-    });
-
-  return response.body.data.track;
-};
-
-export const createTestPlaylist = async (userId: Types.ObjectId, playlistData: any) => {
-  const response = await request(app)
-    .post('/api/v1/playlists')
-    .set('Authorization', `Bearer ${(await createTestUser()).accessToken}`)
-    .send({
-      ...playlistData,
-      userId
-    });
-
-  return response.body.data.playlist;
-};
-
-import { User } from '../models/User';
-import { MusicTrack } from '../models/MusicTrack';
-import { Playlist } from '../models/Playlist';
-import mongoose from 'mongoose';
 
 export const createTestUser = async (overrides = {}) => {
   const defaultUser = {

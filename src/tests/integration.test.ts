@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { app } from '../index';
+import app from '../index';
 import { createTestUser, createTestTrack, createTestPlaylist } from './helpers';
 import { MusicTrack } from '../models/MusicTrack';
 import { Playlist } from '../models/Playlist';
@@ -103,7 +103,7 @@ describe('Integration Tests', () => {
 
     it('should handle track deletion with playlist cleanup', async () => {
       // Create track and add to multiple playlists
-      const track = await createTestTrack(testUser.user._id);
+      const track = await createTestTrack(testUser.user._id, {});
       const playlist1 = await createTestPlaylist(testUser.user._id, { tracks: [track._id] });
       const playlist2 = await createTestPlaylist(testUser.user._id, { tracks: [track._id] });
 
@@ -135,7 +135,7 @@ describe('Integration Tests', () => {
       const otherAuthHeader = { Authorization: `Bearer ${otherUser.accessToken}` };
 
       // 2. First user creates a public playlist with tracks
-      const track = await createTestTrack(testUser.user._id);
+      const track = await createTestTrack(testUser.user._id, {});
       const playlist = await createTestPlaylist(testUser.user._id, {
         isPublic: true,
         tracks: [track._id]
@@ -287,9 +287,9 @@ describe('Integration Tests', () => {
 
   describe('Error Handling Flow', () => {
     it('should handle concurrent playlist modifications', async () => {
-      const track1 = await createTestTrack(testUser.user._id);
-      const track2 = await createTestTrack(testUser.user._id);
-      const playlist = await createTestPlaylist(testUser.user._id);
+      const track1 = await createTestTrack(testUser.user._id, {});
+      const track2 = await createTestTrack(testUser.user._id, {});
+      const playlist = await createTestPlaylist(testUser.user._id, {});
 
       // Simulate concurrent track additions
       await Promise.all([

@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { app } from '../index';
+import app from '../index';
 import { Playlist } from '../models/Playlist';
 import { createTestUser, createTestTrack, createTestPlaylist } from './helpers';
 

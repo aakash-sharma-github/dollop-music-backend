@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { app } from '../index';
+import app from '../index'
 import { createTestUser, createTestTrack, createTestPlaylist } from './helpers';
 import jwt from 'jsonwebtoken';
 
@@ -76,6 +76,7 @@ describe('Security Tests', () => {
     it('should prevent accessing private resources across users', async () => {
       const otherUser = await createTestUser({
         email: 'other@example.com',
+        password: 'Password123!',
         username: 'otheruser'
       });
 
@@ -92,12 +93,13 @@ describe('Security Tests', () => {
 
     it('should prevent unauthorized playlist modifications', async () => {
       const otherUser = await createTestUser({
-        email: 'other@example.com',
+        email: 'other@example.com', 
+        password: 'Password123!',
         username: 'otheruser'
       });
 
-      const playlist = await createTestPlaylist(otherUser.user._id);
-      const track = await createTestTrack(testUser.user._id);
+      const playlist = await createTestPlaylist(otherUser.user._id, { isPublic: true });
+      const track = await createTestTrack(testUser.user._id, { isPublic: true });
 
       const res = await request(app)
         .post(`/api/v1/playlists/${playlist._id}/tracks`)
@@ -237,7 +239,7 @@ describe('Security Tests', () => {
       });
 
       const otherUser = await createTestUser({
-        email: 'other@example.com',
+        email: 'other@example.com', password: 'Password123!',
         username: 'otheruser'
       });
 

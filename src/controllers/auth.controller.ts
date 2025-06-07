@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
-import bcrypt from 'bcryptjs';
-import { User } from '@/models/User';
-import { AppError } from '@/middleware/error';
-import { AuthRequest } from '../types';
+import { Request, Response, NextFunction } from "express";
+import bcrypt from "bcryptjs";
+import { User } from "@/models/User";
+import { AppError } from "@/middleware/error";
+import { AuthRequest } from "../types";
 
 export class AuthController {
   // Register new user
@@ -13,7 +13,10 @@ export class AuthController {
       // Check if user already exists
       const userExists = await User.findOne({ $or: [{ email }, { username }] });
       if (userExists) {
-        throw new AppError('User with this email or username already exists', 400);
+        throw new AppError(
+          "User with this email or username already exists",
+          400
+        );
       }
 
       // Create new user
@@ -26,10 +29,13 @@ export class AuthController {
       // Generate tokens
       const accessToken = user.generateAuthToken();
       const refreshToken = user.generateRefreshToken();
+      
+      // Store the refresh token
+      (user as any).refreshToken = refreshToken;
       await user.save();
 
       res.status(201).json({
-        status: 'success',
+        status: "success",
         data: {
           user: {
             id: user._id,
@@ -51,24 +57,27 @@ export class AuthController {
       const { email, password } = req.body;
 
       // Check if user exists
-      const user = await User.findOne({ email }).select('+password');
+      const user = await User.findOne({ email }).select("+password");
       if (!user) {
-        throw new AppError('Invalid credentials', 401);
+        throw new AppError("Invalid credentials", 401);
       }
 
       // Check password
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
-        throw new AppError('Invalid credentials', 401);
+        throw new AppError("Invalid credentials", 401);
       }
 
       // Generate tokens
       const accessToken = user.generateAuthToken();
       const refreshToken = user.generateRefreshToken();
+      
+      // Store the refresh token
+      (user as any).refreshToken = refreshToken;
       await user.save();
 
       res.json({
-        status: 'success',
+        status: "success",
         data: {
           user: {
             id: user._id,
@@ -85,15 +94,19 @@ export class AuthController {
   }
 
   // Get current user
-  static async getCurrentUser(req: AuthRequest, res: Response, next: NextFunction) {
+  static async getCurrentUser(
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
       const user = req.user;
       if (!user) {
-        throw new AppError('Not authenticated', 401);
+        throw new AppError("Not authenticated", 401);
       }
 
       res.json({
-        status: 'success',
+        status: "success",
         data: {
           user: {
             id: user._id,
@@ -112,15 +125,15 @@ export class AuthController {
     try {
       const user = req.user;
       if (!user) {
-        throw new AppError('Not authenticated', 401);
+        throw new AppError("Not authenticated", 401);
       }
 
       (user as any).refreshToken = undefined;
       await user.save();
 
       res.json({
-        status: 'success',
-        message: 'Successfully logged out'
+        status: "success",
+        message: "Successfully logged out"
       });
     } catch (error) {
       next(error);
@@ -131,22 +144,25 @@ export class AuthController {
   static async refreshToken(req: Request, res: Response, next: NextFunction) {
     try {
       const { refreshToken } = req.body;
-
+  
       if (!refreshToken) {
-        throw new AppError('Refresh token is required', 400);
+        throw new AppError("Refresh token is required", 400);
       }
-
-      const user = await User.findOne({ refreshToken });
+  
+      const user = await User.findOne({ refreshToken }).select("+refreshToken");
       if (!user) {
-        throw new AppError('Invalid refresh token', 401);
+        throw new AppError("Invalid refresh token", 401);
       }
-
+  
       const accessToken = user.generateAuthToken();
       const newRefreshToken = user.generateRefreshToken();
+      
+      // Update the stored refresh token
+      (user as any).refreshToken = newRefreshToken;
       await user.save();
-
+  
       res.json({
-        status: 'success',
+        status: "success",
         data: {
           accessToken,
           refreshToken: newRefreshToken
@@ -157,4 +173,3 @@ export class AuthController {
     }
   }
 }
-
